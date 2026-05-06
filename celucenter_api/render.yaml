@@ -1,11 +1,9 @@
 services:
   - type: web
     name: celucenter-api
-    runtime: native
-    buildCommand: dart pub get
-    startCommand: dart run bin/server.dart
+    runtime: docker
+    dockerfilePath: ./Dockerfile
     plan: free
-    healthCheckPath: /health
     envVars:
       - key: SENDGRID_API_KEY
         value: PEGAR_AQUI_TU_SENDGRID_API_KEY

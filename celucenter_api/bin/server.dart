@@ -18,41 +18,39 @@ import '../lib/handlers/upload_handler.dart';
 void main() async {
   final router = Router();
 
-  // ── Públicos ───────────────────────────────────────────────────────────────
+  // Health checks
+  router.get('/health', (_) => Response.ok('OK'));
+  router.get('/', (_) => Response.ok('CeluCenter API corriendo'));
+
+  // Públicos
   router.mount('/api/auth/',      authRouter().call);
   router.mount('/api/productos',  productRouter().call);
   router.mount('/api/categorias', categoryRouter().call);
   router.post('/api/pagos/webhook', (Request req) =>
       paymentRouter().call(req.change(path: '/webhook')));
 
-  // ── Protegidos [JWT] ───────────────────────────────────────────────────────
-  router.mount('/api/ordenes/',         _protected(orderRouter().call));
-  router.mount('/api/pagos/',           _protected(paymentRouter().call));
-  router.mount('/api/usuarios/',        _protected(userRouter().call));
-  router.mount('/api/notificaciones/',  _protected(emailRouter().call));
+  // Protegidos [JWT]
+  router.mount('/api/ordenes/',        _protected(orderRouter().call));
+  router.mount('/api/pagos/',          _protected(paymentRouter().call));
+  router.mount('/api/usuarios/',       _protected(userRouter().call));
+  router.mount('/api/notificaciones/', _protected(emailRouter().call));
 
-  // ── Admin [JWT + isAdmin] ──────────────────────────────────────────────────
-  router.mount('/api/admin/productos',  _admin(productAdminRouter().call));
-  router.mount('/api/admin/upload/',    _admin(uploadRouter().call));
-  router.mount('/api/admin/ordenes/',   _admin(orderAdminRouter().call));
+  // Admin [JWT + isAdmin]
+  router.mount('/api/admin/productos', _admin(productAdminRouter().call));
+  router.mount('/api/admin/upload/',   _admin(uploadRouter().call));
+  router.mount('/api/admin/ordenes/',  _admin(orderAdminRouter().call));
 
   final handler = Pipeline()
       .addMiddleware(corsMiddleware())
       .addMiddleware(logRequests())
       .addHandler(router.call);
 
-  final server = await io.serve(
-      handler, InternetAddress.anyIPv4, AppConfig.port);
+  // Render inyecta PORT como variable de entorno del sistema operativo
+  final port   = int.tryParse(Platform.environment['PORT'] ?? '') ?? 8080;
+  final server = await io.serve(handler, InternetAddress.anyIPv4, port);
 
-  print('');
-  print('┌──────────────────────────────────────────────┐');
-  print('│  CeluCenter API — http://localhost:8080      │');
-  print('│                                              │');
-  print('│  Admin por defecto:                          │');
-  print('│  Email:    ${AppConfig.adminEmail}           │');
-  print('│  Password: ${AppConfig.adminPassword}        │');
-  print('└──────────────────────────────────────────────┘');
-
+  print('CeluCenter API corriendo en http://0.0.0.0:$port');
+  print('Admin: ${AppConfig.adminEmail} / ${AppConfig.adminPassword}');
   server.autoCompress = true;
 }
 
