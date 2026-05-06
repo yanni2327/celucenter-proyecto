@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="CeluCenter — Smartphones, computadoras y accesorios de última generación.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Seguridad básica que NO afecta Flutter Web -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="format-detection" content="telephone=no, email=no, address=no">
+
+  <!-- Nota: Content-Security-Policy completa va en nginx.conf (producción).
+       No se incluye aquí porque upgrade-insecure-requests bloquea
+       las conexiones ws:// del debug service de Flutter en desarrollo. -->
+
+  <!-- iOS / PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="CeluCenter">
+
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Syne:wght@400;700;800&display=swap"
+        rel="stylesheet">
+
+  <title>CeluCenter</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #ffffff; overflow: hidden; }
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      gap: 16px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    #loading-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    #loading-logo span { color: #419F00; }
+    #loading-bar {
+      width: 200px; height: 3px;
+      background: #e3f59b; border-radius: 2px; overflow: hidden;
+    }
+    #loading-progress {
+      height: 100%; background: #419F00; border-radius: 2px;
+      animation: load 1.8s ease-in-out infinite;
+    }
+    @keyframes load {
+      0%   { width: 0%; }
+      50%  { width: 70%; }
+      100% { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div id="loading-logo">Celu<span>Center</span></div>
+    <div id="loading-bar"><div id="loading-progress"></div></div>
+  </div>
+
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      const loader = document.getElementById('loading');
+      if (loader) {
+        loader.style.transition = 'opacity 0.3s ease';
+        loader.style.opacity = '0';
+        setTimeout(() => loader.style.display = 'none', 300);
+      }
+    });
+  </script>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
