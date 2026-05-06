@@ -1,23 +1,15 @@
-# render.yaml — Despliega backend + frontend desde un solo archivo
-# Sube este archivo en la raíz de un repositorio que contenga:
-#   celucenter_api/   ← backend Dart
-#   celucenter/       ← frontend Flutter Web
-
 services:
-
-  # ── Backend Dart ─────────────────────────────────────────────────────────
   - type: web
     name: celucenter-api
-    runtime: docker
-    dockerfilePath: ./Dockerfile
+    runtime: native
+    buildCommand: dart pub get
+    startCommand: dart run bin/server.dart
     plan: free
     healthCheckPath: /health
     envVars:
-      - key: PORT
-        value: 8080
-      - key: JWT_SECRET
-        value: celucenter_jwt_secret_cambiar_en_produccion_2025
-      - key: WEBHOOK_SECRET
-        value: celucenter_webhook_cambiar_2025
       - key: SENDGRID_API_KEY
         value: PEGAR_AQUI_TU_SENDGRID_API_KEY
+      - key: JWT_SECRET
+        value: celucenter_jwt_secret_2025
+      - key: WEBHOOK_SECRET
+        value: celucenter_webhook_secret_2025
