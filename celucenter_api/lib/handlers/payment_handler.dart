@@ -10,8 +10,7 @@ import '../models/order.dart';
 Router paymentRouter() {
   final router = Router();
 
-  // POST /api/pagos/sesion  →  Crea sesión de pago (requiere auth)
-  // En producción: llama a Stripe o MercadoPago y devuelve la URL de redirección.
+  // POST /api/pagos/sesion
   router.post('/sesion', (Request req) async {
     final userId = getUserId(req);
     if (userId == null) return _json({'error': 'No autenticado'}, 401);
@@ -23,11 +22,7 @@ Router paymentRouter() {
     if (order == null) return _json({'error': 'Orden no encontrada'}, 404);
     if (order.userId != userId) return _json({'error': 'Sin permiso'}, 403);
 
-    // ── Simulación de sesión de pago ──────────────────────────────────────
-    // En producción: llamar a stripe.checkout.sessions.create(...)
-    // y devolver session.url
-    final redirectUrl =
-        'https://checkout.stripe.com/pay/simulado_${order.id}';
+    final redirectUrl = 'https://checkout.stripe.com/pay/simulado_${order.id}';
 
     return _json({
       'redirectUrl': redirectUrl,
@@ -37,14 +32,12 @@ Router paymentRouter() {
     });
   });
 
-  // POST /api/pagos/webhook  →  Solo acepta POST desde la pasarela
-  // Nginx filtra esta ruta para solo aceptar POST.
+  // POST /api/pagos/webhook
   router.post('/webhook', (Request req) async {
     final signature = req.headers['x-stripe-signature'] ??
                       req.headers['x-mercadopago-signature'] ?? '';
     final body      = await req.readAsString();
 
-    // Verificar firma HMAC-SHA256
     if (!_verifyWebhookSignature(body, signature)) {
       return _json({'error': 'Firma inválida'}, 401);
     }
@@ -59,7 +52,6 @@ Router paymentRouter() {
       print('[Webhook] Pago confirmado para orden $ordenId');
     }
 
-    // Responder 200 inmediatamente (buena práctica con pasarelas)
     return _json({'received': true});
   });
 

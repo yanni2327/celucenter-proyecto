@@ -12,10 +12,8 @@ Router userRouter() {
   router.get('/perfil', (Request req) async {
     final userId = getUserId(req);
     if (userId == null) return _json({'error': 'No autenticado'}, 401);
-
     final user = Database.instance.findUserById(userId);
     if (user == null) return _json({'error': 'Usuario no encontrado'}, 404);
-
     return _json(user.toJson());
   });
 
@@ -23,7 +21,6 @@ Router userRouter() {
   router.put('/perfil', (Request req) async {
     final userId = getUserId(req);
     if (userId == null) return _json({'error': 'No autenticado'}, 401);
-
     final user = Database.instance.findUserById(userId);
     if (user == null) return _json({'error': 'Usuario no encontrado'}, 404);
 
@@ -37,10 +34,10 @@ Router userRouter() {
       email:        user.email,
       passwordHash: user.passwordHash,
       phone:        phone,
+      isAdmin:      user.isAdmin,
       createdAt:    user.createdAt,
     );
     Database.instance.saveUser(updated);
-
     return _json(updated.toJson());
   });
 

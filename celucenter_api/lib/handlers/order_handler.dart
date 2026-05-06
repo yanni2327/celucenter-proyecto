@@ -8,7 +8,7 @@ import '../models/order.dart';
 Router orderRouter() {
   final router = Router();
 
-  // POST /api/ordenes  →  Crea un pedido (requiere auth)
+  // POST /api/ordenes/
   router.post('/', (Request req) async {
     final userId = getUserId(req);
     if (userId == null) return _json({'error': 'No autenticado'}, 401);
@@ -58,15 +58,13 @@ Router orderRouter() {
       createdAt: DateTime.now(),
     );
     Database.instance.saveOrder(order);
-
     return _json({'ordenId': order.id, 'order': order.toJson()}, 201);
   });
 
-  // GET /api/ordenes  →  Historial del usuario autenticado
+  // GET /api/ordenes/
   router.get('/', (Request req) async {
     final userId = getUserId(req);
     if (userId == null) return _json({'error': 'No autenticado'}, 401);
-
     final orders = Database.instance.getOrdersByUser(userId);
     return _json({'data': orders.map((o) => o.toJson()).toList()});
   });
@@ -75,12 +73,34 @@ Router orderRouter() {
   router.get('/<id>', (Request req, String id) async {
     final userId = getUserId(req);
     if (userId == null) return _json({'error': 'No autenticado'}, 401);
-
     final order = Database.instance.findOrderById(id);
     if (order == null) return _json({'error': 'Orden no encontrada'}, 404);
     if (order.userId != userId) return _json({'error': 'Sin permiso'}, 403);
-
     return _json(order.toJson());
+  });
+
+  return router;
+}
+
+// GET+PUT /api/admin/ordenes/
+Router orderAdminRouter() {
+  final router = Router();
+
+  router.get('/', (Request req) async {
+    final orders = Database.instance.getAllOrders();
+    return _json({'data': orders.map((o) => o.toJson()).toList()});
+  });
+
+  router.put('/<id>/estado', (Request req, String id) async {
+    final body        = jsonDecode(await req.readAsString()) as Map<String, dynamic>;
+    final status      = body['status'] as String? ?? '';
+    final orderStatus = OrderStatus.values
+        .where((s) => s.name == status).firstOrNull;
+    if (orderStatus == null) {
+      return _json({'error': 'Estado inválido'}, 400);
+    }
+    Database.instance.updateOrderStatus(id, orderStatus);
+    return _json({'message': 'Estado actualizado'});
   });
 
   return router;
@@ -95,33 +115,4 @@ Response _json(dynamic data, [int status = 200]) => Response(
 String _uuid() {
   final now = DateTime.now().millisecondsSinceEpoch;
   return 'ord_${now}_${(now * 9876543).toRadixString(16).substring(0, 8)}';
-}
-
-// Ruta solo para admin — GET /api/admin/ordenes/
-Router orderAdminRouter() {
-  final router = Router();
-
-  router.get('/', (Request req) async {
-    final orders = Database.instance.getAllOrders();
-    return Response(200,
-        body: jsonEncode({'data': orders.map((o) => o.toJson()).toList()}),
-        headers: {'Content-Type': 'application/json'});
-  });
-
-  router.put('/<id>/estado', (Request req, String id) async {
-    final body   = jsonDecode(await req.readAsString()) as Map<String, dynamic>;
-    final status = body['status'] as String? ?? '';
-    final orderStatus = OrderStatus.values.where((s) => s.name == status).firstOrNull;
-    if (orderStatus == null) {
-      return Response(400,
-          body: jsonEncode({'error': 'Estado inválido'}),
-          headers: {'Content-Type': 'application/json'});
-    }
-    Database.instance.updateOrderStatus(id, orderStatus);
-    return Response(200,
-        body: jsonEncode({'message': 'Estado actualizado'}),
-        headers: {'Content-Type': 'application/json'});
-  });
-
-  return router;
 }
