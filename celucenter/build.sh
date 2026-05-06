@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-echo "==> Instalando Flutter..."
-git clone https://github.com/flutter/flutter.git -b stable --depth 1 /opt/flutter
-export PATH="$PATH:/opt/flutter/bin"
+echo "==> Instalando Flutter en HOME..."
+git clone https://github.com/flutter/flutter.git -b stable --depth 1 $HOME/flutter
+export PATH="$PATH:$HOME/flutter/bin"
 
-echo "==> Aceptando licencias Android..."
+echo "==> Desactivando analytics..."
 flutter config --no-analytics
 
 echo "==> Instalando dependencias..."
