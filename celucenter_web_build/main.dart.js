@@ -47256,7 +47256,7 @@ fw(a,b,c){return this.al2(a,b,c)},
 jf(a,b){return this.fw(a,b,null)},
 al2(a,b,c){var s=0,r=A.R(t.bc),q,p=2,o=[],n=this,m,l,k,j,i,h,g
 var $async$fw=A.S(function(d,e){if(d===1){o.push(e)
-s=p}for(;;)switch(s){case 0:j=A.ee("http://localhost:8080"+b,0,null)
+s=p}for(;;)switch(s){case 0:j=A.ee("https://celucenter-api.onrender.com"+b,0,null)
 i=t.N
 h=A.aHv(B.Pu,i,i)
 i=n.a
