@@ -35,7 +35,9 @@ class _ProductCardState extends State<ProductCard> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _cardHovered = true),
       onExit: (_) => setState(() => _cardHovered = false),
-      child: AnimatedContainer(
+      child: GestureDetector(
+        onTap: () => context.go(AppRoutes.product(widget.product.id)),
+        child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         decoration: BoxDecoration(
           color: AppColors.white,
@@ -194,6 +196,7 @@ class _ProductCardState extends State<ProductCard> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
