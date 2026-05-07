@@ -7,7 +7,6 @@ import '../models/product.dart';
 Router productAdminRouter() {
   final router = Router();
 
-  // POST /api/admin/productos
   router.post('/', (Request req) async {
     final body  = jsonDecode(await req.readAsString()) as Map<String, dynamic>;
     final name  = body['name']     as String? ?? '';
@@ -21,50 +20,44 @@ Router productAdminRouter() {
 
     final product = Product(
       id:           _uuid(),
-      brand:        brand,
-      name:         name,
-      price:        price,
+      brand:        brand, name: name, price: price,
       originalPrice:body['originalPrice'] as int?,
-      emoji:        body['emoji']         as String? ?? '📦',
+      emoji:        body['emoji']        as String? ?? '📦',
       category:     cat,
-      badge:        body['badge']         as String?,
-      badgeIsRed:   body['badgeIsRed']    as bool?  ?? false,
-      stock:        body['stock']         as int?   ?? 0,
-      description:  body['description']   as String? ?? '',
-      specs:        (body['specs'] as Map<String, dynamic>?)
-                      ?.map((k, v) => MapEntry(k, v.toString())) ?? {},
+      badge:        body['badge']        as String?,
+      badgeIsRed:   body['badgeIsRed']   as bool?  ?? false,
+      stock:        body['stock']        as int?   ?? 0,
+      description:  body['description']  as String? ?? '',
+      specs:        (body['specs'] as Map<String,dynamic>?)
+                      ?.map((k,v) => MapEntry(k, v.toString())) ?? {},
       imageUrl:     body['imageUrl'] as String?,
     );
 
-    Database.instance.addProduct(product);
+    await Database.instance.addProduct(product);
     return _json(product.toJson(), 201);
   });
 
-  // PUT /api/admin/productos/:id
   router.put('/<id>', (Request req, String id) async {
     final body    = jsonDecode(await req.readAsString()) as Map<String, dynamic>;
-    final updated = Database.instance.updateProduct(id, body);
+    final updated = await Database.instance.updateProduct(id, body);
     if (!updated) return _json({'error': 'Producto no encontrado'}, 404);
-    final product = Database.instance.findProductById(id);
+    final product = await Database.instance.findProductById(id);
     return _json(product!.toJson());
   });
 
-  // PUT /api/admin/productos/:id/stock
   router.put('/<id>/stock', (Request req, String id) async {
     final body  = jsonDecode(await req.readAsString()) as Map<String, dynamic>;
     final stock = body['stock'] as int?;
     if (stock == null || stock < 0) {
       return _json({'error': 'Stock inválido'}, 400);
     }
-    final updated = Database.instance.updateProduct(id, {'stock': stock});
+    final updated = await Database.instance.updateProduct(id, {'stock': stock});
     if (!updated) return _json({'error': 'Producto no encontrado'}, 404);
     return _json({'message': 'Stock actualizado', 'stock': stock});
   });
 
-  // DELETE /api/admin/productos/:id
   router.delete('/<id>', (Request req, String id) async {
-    final deleted = Database.instance.deleteProduct(id);
-    if (!deleted) return _json({'error': 'Producto no encontrado'}, 404);
+    await Database.instance.deleteProduct(id);
     return _json({'message': 'Producto eliminado'});
   });
 

@@ -3,6 +3,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
 import '../lib/config.dart';
+import '../lib/database.dart';
 import '../lib/middleware/cors.dart';
 import '../lib/middleware/auth.dart';
 import '../lib/middleware/admin.dart';
@@ -16,11 +17,14 @@ import '../lib/handlers/product_admin_handler.dart';
 import '../lib/handlers/upload_handler.dart';
 
 void main() async {
+  // Inicializar PostgreSQL (Neon)
+  print('Conectando a PostgreSQL...');
+  await Database.instance.init();
+
   final router = Router();
 
-  // Health checks
+  router.get('/',       (_) => Response.ok('CeluCenter API corriendo'));
   router.get('/health', (_) => Response.ok('OK'));
-  router.get('/', (_) => Response.ok('CeluCenter API corriendo'));
 
   // Públicos
   router.mount('/api/auth/',      authRouter().call);
@@ -45,11 +49,10 @@ void main() async {
       .addMiddleware(logRequests())
       .addHandler(router.call);
 
-  // Render inyecta PORT como variable de entorno del sistema operativo
-  final port   = int.tryParse(Platform.environment['PORT'] ?? '') ?? 8080;
+  final port   = int.tryParse(Platform.environment['PORT'] ?? '') ?? AppConfig.port;
   final server = await io.serve(handler, InternetAddress.anyIPv4, port);
 
-  print('CeluCenter API corriendo en http://0.0.0.0:$port');
+  print('CeluCenter API en http://0.0.0.0:$port');
   print('Admin: ${AppConfig.adminEmail} / ${AppConfig.adminPassword}');
   server.autoCompress = true;
 }

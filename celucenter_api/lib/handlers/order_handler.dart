@@ -8,13 +8,12 @@ import '../models/order.dart';
 Router orderRouter() {
   final router = Router();
 
-  // POST /api/ordenes/
   router.post('/', (Request req) async {
     final userId = getUserId(req);
     if (userId == null) return _json({'error': 'No autenticado'}, 401);
 
     final body  = jsonDecode(await req.readAsString()) as Map<String, dynamic>;
-    final items = (body['items'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final items = (body['items'] as List?)?.cast<Map<String,dynamic>>() ?? [];
     final name  = body['name']    as String? ?? '';
     final phone = body['phone']   as String? ?? '';
     final addr  = body['address'] as String? ?? '';
@@ -29,51 +28,37 @@ Router orderRouter() {
     final orderItems = <OrderItem>[];
     for (final item in items) {
       final productId = item['productId'] as String? ?? '';
-      final product   = Database.instance.findProductById(productId);
+      final product   = await Database.instance.findProductById(productId);
       if (product == null) {
         return _json({'error': 'Producto $productId no encontrado'}, 404);
       }
       final qty = (item['quantity'] as int?) ?? 1;
-      if (product.stock < qty) {
-        return _json({'error': 'Stock insuficiente para ${product.name}'}, 422);
-      }
       orderItems.add(OrderItem(
-        productId:    product.id,
-        productName:  product.name,
-        productEmoji: product.emoji,
-        quantity:     qty,
-        unitPrice:    product.price,
+        productId: product.id, productName: product.name,
+        productEmoji: product.emoji, quantity: qty, unitPrice: product.price,
       ));
     }
 
     final order = Order(
-      id:        _uuid(),
-      userId:    userId,
-      items:     orderItems,
-      name:      name,
-      phone:     phone,
-      address:   addr,
-      city:      city,
-      notes:     notes,
-      createdAt: DateTime.now(),
+      id: _uuid(), userId: userId, items: orderItems,
+      name: name, phone: phone, address: addr, city: city,
+      notes: notes, createdAt: DateTime.now(),
     );
-    Database.instance.saveOrder(order);
+    await Database.instance.saveOrder(order);
     return _json({'ordenId': order.id, 'order': order.toJson()}, 201);
   });
 
-  // GET /api/ordenes/
   router.get('/', (Request req) async {
     final userId = getUserId(req);
     if (userId == null) return _json({'error': 'No autenticado'}, 401);
-    final orders = Database.instance.getOrdersByUser(userId);
+    final orders = await Database.instance.getOrdersByUser(userId);
     return _json({'data': orders.map((o) => o.toJson()).toList()});
   });
 
-  // GET /api/ordenes/:id
   router.get('/<id>', (Request req, String id) async {
     final userId = getUserId(req);
     if (userId == null) return _json({'error': 'No autenticado'}, 401);
-    final order = Database.instance.findOrderById(id);
+    final order = await Database.instance.findOrderById(id);
     if (order == null) return _json({'error': 'Orden no encontrada'}, 404);
     if (order.userId != userId) return _json({'error': 'Sin permiso'}, 403);
     return _json(order.toJson());
@@ -82,24 +67,21 @@ Router orderRouter() {
   return router;
 }
 
-// GET+PUT /api/admin/ordenes/
 Router orderAdminRouter() {
   final router = Router();
 
   router.get('/', (Request req) async {
-    final orders = Database.instance.getAllOrders();
+    final orders = await Database.instance.getAllOrders();
     return _json({'data': orders.map((o) => o.toJson()).toList()});
   });
 
   router.put('/<id>/estado', (Request req, String id) async {
-    final body        = jsonDecode(await req.readAsString()) as Map<String, dynamic>;
+    final body        = jsonDecode(await req.readAsString()) as Map<String,dynamic>;
     final status      = body['status'] as String? ?? '';
     final orderStatus = OrderStatus.values
         .where((s) => s.name == status).firstOrNull;
-    if (orderStatus == null) {
-      return _json({'error': 'Estado inválido'}, 400);
-    }
-    Database.instance.updateOrderStatus(id, orderStatus);
+    if (orderStatus == null) return _json({'error': 'Estado inválido'}, 400);
+    await Database.instance.updateOrderStatus(id, orderStatus);
     return _json({'message': 'Estado actualizado'});
   });
 
@@ -107,10 +89,8 @@ Router orderAdminRouter() {
 }
 
 Response _json(dynamic data, [int status = 200]) => Response(
-      status,
-      body: jsonEncode(data),
-      headers: {'Content-Type': 'application/json'},
-    );
+      status, body: jsonEncode(data),
+      headers: {'Content-Type': 'application/json'});
 
 String _uuid() {
   final now = DateTime.now().millisecondsSinceEpoch;

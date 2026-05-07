@@ -3,8 +3,6 @@ import 'package:shelf/shelf.dart';
 import 'auth.dart';
 import '../database.dart';
 
-/// Middleware que verifica que el usuario sea administrador.
-/// Debe usarse DESPUÉS de authMiddleware().
 Middleware adminMiddleware() {
   return (Handler inner) {
     return (Request request) async {
@@ -14,14 +12,12 @@ Middleware adminMiddleware() {
             body: jsonEncode({'error': 'No autenticado'}),
             headers: {'Content-Type': 'application/json'});
       }
-
-      final user = Database.instance.findUserById(userId);
+      final user = await Database.instance.findUserById(userId);
       if (user == null || !user.isAdmin) {
         return Response(403,
-            body: jsonEncode({'error': 'Acceso denegado. Se requiere rol de administrador.'}),
+            body: jsonEncode({'error': 'Acceso denegado. Se requiere rol admin.'}),
             headers: {'Content-Type': 'application/json'});
       }
-
       return inner(request);
     };
   };

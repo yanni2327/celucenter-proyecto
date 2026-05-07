@@ -8,36 +8,28 @@ import '../models/user.dart';
 Router userRouter() {
   final router = Router();
 
-  // GET /api/usuarios/perfil
   router.get('/perfil', (Request req) async {
     final userId = getUserId(req);
     if (userId == null) return _json({'error': 'No autenticado'}, 401);
-    final user = Database.instance.findUserById(userId);
+    final user = await Database.instance.findUserById(userId);
     if (user == null) return _json({'error': 'Usuario no encontrado'}, 404);
     return _json(user.toJson());
   });
 
-  // PUT /api/usuarios/perfil
   router.put('/perfil', (Request req) async {
     final userId = getUserId(req);
     if (userId == null) return _json({'error': 'No autenticado'}, 401);
-    final user = Database.instance.findUserById(userId);
+    final user = await Database.instance.findUserById(userId);
     if (user == null) return _json({'error': 'Usuario no encontrado'}, 404);
 
-    final body  = jsonDecode(await req.readAsString()) as Map<String, dynamic>;
-    final name  = (body['name']  as String?)?.trim() ?? user.name;
-    final phone = (body['phone'] as String?) ?? user.phone;
-
+    final body  = jsonDecode(await req.readAsString()) as Map<String,dynamic>;
     final updated = User(
-      id:           user.id,
-      name:         name,
-      email:        user.email,
-      passwordHash: user.passwordHash,
-      phone:        phone,
-      isAdmin:      user.isAdmin,
-      createdAt:    user.createdAt,
+      id: user.id, email: user.email, passwordHash: user.passwordHash,
+      isAdmin: user.isAdmin, createdAt: user.createdAt,
+      name:  (body['name']  as String?)?.trim() ?? user.name,
+      phone: (body['phone'] as String?) ?? user.phone,
     );
-    Database.instance.saveUser(updated);
+    await Database.instance.saveUser(updated);
     return _json(updated.toJson());
   });
 
@@ -45,7 +37,5 @@ Router userRouter() {
 }
 
 Response _json(dynamic data, [int status = 200]) => Response(
-      status,
-      body: jsonEncode(data),
-      headers: {'Content-Type': 'application/json'},
-    );
+      status, body: jsonEncode(data),
+      headers: {'Content-Type': 'application/json'});
