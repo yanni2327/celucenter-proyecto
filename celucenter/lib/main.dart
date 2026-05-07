@@ -8,10 +8,10 @@ import 'core/patterns/cart_observers.dart';
 import 'core/patterns/auth_observers.dart';
 import 'core/patterns/snackbar_observer.dart';
 import 'core/patterns/email_observer.dart';
+import 'features/cart/presentation/cart_drawer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Restaurar sesión guardada antes de mostrar la app
   await AuthController().loadSession();
   runApp(const CeluCenterApp());
 }
@@ -49,9 +49,6 @@ class _CeluCenterAppState extends State<CeluCenterApp> {
       ..addObserver(EmailObserver())
       ..addObserver(SessionGuardObserver(
           onSessionExpired: () => appRouter.go('/login')));
-
-    debugPrint('[Observer] ✓ ${_cartController.observerCount} cart observers');
-    debugPrint('[Observer] ✓ ${_authController.observerCount} auth observers');
   }
 
   @override
@@ -71,6 +68,13 @@ class _CeluCenterAppState extends State<CeluCenterApp> {
         theme: AppTheme.light,
         routerConfig: appRouter,
         scaffoldMessengerKey: scaffoldMessengerKey,
+        // builder envuelve TODAS las páginas — CartDrawer siempre disponible
+        builder: (context, child) => Stack(
+          children: [
+            child ?? const SizedBox.shrink(),
+            const CartDrawer(),
+          ],
+        ),
       ),
     );
   }
