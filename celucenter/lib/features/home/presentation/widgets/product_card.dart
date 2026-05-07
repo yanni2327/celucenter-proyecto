@@ -70,10 +70,24 @@ class _ProductCardState extends State<ProductCard> {
                       topRight: Radius.circular(10),
                     ),
                   ),
-                  child: Center(
-                    child: Text(widget.product.emoji,
-                        style: const TextStyle(fontSize: 48)),
-                  ),
+                  child: widget.product.imageUrl != null
+                      ? ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            topRight: Radius.circular(10),
+                          ),
+                          child: Image.network(
+                            widget.product.imageUrl!,
+                            width: double.infinity,
+                            height: 160,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Center(
+                              child: Text(widget.product.emoji,
+                                  style: const TextStyle(fontSize: 48))),
+                          ))
+                      : Center(
+                          child: Text(widget.product.emoji,
+                              style: const TextStyle(fontSize: 48))),
                 ),
                 if (widget.product.badge != null)
                   Positioned(
