@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/state/auth_controller.dart';
 import '../../../../core/state/cart_scope.dart';
+import '../../../../core/state/cart_controller.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/state/auth_controller.dart';
@@ -27,7 +28,7 @@ class _NavbarWidgetState extends State<NavbarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final cart  = CartScope.of(context);
+    final cart  = CartController();
     final auth  = AuthController();
     final width = MediaQuery.of(context).size.width;
 

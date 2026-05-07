@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'cart_controller.dart';
 
-/// InheritedNotifier que provee CartController a todo el árbol de widgets
-/// sin necesidad de paquetes externos (como provider o riverpod).
+/// CartScope mantiene compatibilidad con el código existente.
+/// Internamente usa el singleton CartController.
 class CartScope extends InheritedNotifier<CartController> {
   const CartScope({
     super.key,
@@ -10,19 +10,19 @@ class CartScope extends InheritedNotifier<CartController> {
     required super.child,
   }) : super(notifier: controller);
 
-  /// Accede al CartController más cercano en el árbol.
+  /// Obtiene el CartController — usa el singleton directamente.
   static CartController of(BuildContext context) {
-    final scope =
-        context.dependOnInheritedWidgetOfExactType<CartScope>();
-    assert(scope != null, 'No CartScope encontrado en el árbol de widgets');
-    return scope!.notifier!;
+    // Primero intenta InheritedWidget, si no usa el singleton
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<CartScope>();
+    return scope?.notifier ?? CartController();
   }
 
-  /// Versión sin dependencia (no reconstruye el widget al cambiar).
+  /// Lee sin registrar dependencia — usa singleton.
   static CartController read(BuildContext context) {
-    final scope =
-        context.getInheritedWidgetOfExactType<CartScope>();
-    assert(scope != null, 'No CartScope encontrado en el árbol de widgets');
-    return scope!.notifier!;
+    return CartController();
   }
+
+  @override
+  bool updateShouldNotify(CartScope oldWidget) => true;
 }
