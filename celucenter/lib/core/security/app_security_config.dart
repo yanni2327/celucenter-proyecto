@@ -1,12 +1,9 @@
-/// Configuración centralizada de seguridad de CeluCenter.
 class AppSecurityConfig {
   AppSecurityConfig._();
 
   // ── API ────────────────────────────────────────────────────────────────────
-  /// URL del backend.
-  /// Desarrollo: http://localhost:8080
-  /// Producción: cambiar a https://api.celucenter.com
-  static const String apiBaseUrl = 'http://localhost:8080';
+  /// URL del backend en producción (Render.com)
+  static const String apiBaseUrl = 'https://celucenter-api.onrender.com';
 
   static const Duration requestTimeout = Duration(seconds: 30);
   static const Duration connectTimeout = Duration(seconds: 10);
@@ -20,7 +17,7 @@ class AppSecurityConfig {
   static const int passwordMinLength = 8;
   static const int passwordMaxLength = 128;
 
-  // ── Rate limiting (cliente) ────────────────────────────────────────────────
+  // ── Rate limiting ──────────────────────────────────────────────────────────
   static const int      maxLoginAttempts  = 5;
   static const Duration loginLockDuration = Duration(minutes: 15);
 
@@ -28,14 +25,14 @@ class AppSecurityConfig {
   static const int maxTextFieldLength = 200;
   static const int maxSearchLength    = 100;
 
-  // ── Cabeceras HTTP salientes ───────────────────────────────────────────────
+  // ── Headers ────────────────────────────────────────────────────────────────
   static const Map<String, String> defaultHeaders = {
     'Content-Type': 'application/json; charset=UTF-8',
     'Accept':       'application/json',
     'X-Client-App': 'CeluCenter-Flutter-Web/1.0',
   };
 
-  // ── Regex de validación ───────────────────────────────────────────────────
+  // ── Regex ──────────────────────────────────────────────────────────────────
   static final RegExp emailRegex = RegExp(
     r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$',
   );

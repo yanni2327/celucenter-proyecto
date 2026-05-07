@@ -9,7 +9,10 @@ import 'core/patterns/auth_observers.dart';
 import 'core/patterns/snackbar_observer.dart';
 import 'core/patterns/email_observer.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Restaurar sesión guardada antes de mostrar la app
+  await AuthController().loadSession();
   runApp(const CeluCenterApp());
 }
 
@@ -31,27 +34,24 @@ class _CeluCenterAppState extends State<CeluCenterApp> {
   }
 
   void _registerObservers() {
-    // ── Observadores del Carrito ──────────────────────────────────────────
     _cartController
       ..addObserver(const CartLoggerObserver())
       ..addObserver(const CartAnalyticsObserver())
-      ..addObserver(const CartSnackBarObserver())    // ← muestra notificación visual
+      ..addObserver(const CartSnackBarObserver())
       ..addObserver(StockAlertObserver(
-          onLowStock: (name, stock) {
-            debugPrint('⚠️ Stock bajo: $name ($stock disponibles)');
-          }));
+          onLowStock: (name, stock) =>
+              debugPrint('⚠️ Stock bajo: $name ($stock)')));
 
-    // ── Observadores de Autenticación ─────────────────────────────────────
     _authController
       ..addObserver(const AuthLoggerObserver())
       ..addObserver(const AuthAnalyticsObserver())
-      ..addObserver(const AuthSnackBarObserver())    // ← muestra notificación visual
-      ..addObserver(EmailObserver())                 // ← envía correo via SendGrid
+      ..addObserver(const AuthSnackBarObserver())
+      ..addObserver(EmailObserver())
       ..addObserver(SessionGuardObserver(
           onSessionExpired: () => appRouter.go('/login')));
 
-    debugPrint('[Observer] ✓ ${_cartController.observerCount} observadores de carrito');
-    debugPrint('[Observer] ✓ ${_authController.observerCount} observadores de auth');
+    debugPrint('[Observer] ✓ ${_cartController.observerCount} cart observers');
+    debugPrint('[Observer] ✓ ${_authController.observerCount} auth observers');
   }
 
   @override
@@ -70,8 +70,6 @@ class _CeluCenterAppState extends State<CeluCenterApp> {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         routerConfig: appRouter,
-        // scaffoldMessengerKey permite mostrar SnackBars desde los observadores
-        // sin necesitar un BuildContext
         scaffoldMessengerKey: scaffoldMessengerKey,
       ),
     );
