@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/state/cart_scope.dart';
-import '../../cart/presentation/cart_drawer.dart';
 import 'widgets/navbar_widget.dart';
 import 'widgets/hero_section.dart';
 import 'widgets/stats_bar.dart';
@@ -19,9 +18,7 @@ class HomePage extends StatelessWidget {
     final cart = CartScope.of(context);
 
     return Scaffold(
-      body: Stack(
-        children: [
-          CustomScrollView(
+      body: CustomScrollView(
             slivers: [
               SliverPersistentHeader(
                 pinned: true,
@@ -43,9 +40,6 @@ class HomePage extends StatelessWidget {
               const SliverToBoxAdapter(child: FooterWidget()),
             ],
           ),
-          if (cart.isOpen || true) const CartDrawer(),
-        ],
-      ),
     );
   }
 }

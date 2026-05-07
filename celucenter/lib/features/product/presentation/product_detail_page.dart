@@ -7,7 +7,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/models/product_model.dart';
 import '../../home/presentation/widgets/navbar_widget.dart';
-import '../../cart/presentation/cart_drawer.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final String productId;
@@ -83,7 +82,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         onAddToCart: _addToCart,
                       ),
           ),
-          const CartDrawer(),
         ],
       ),
     );

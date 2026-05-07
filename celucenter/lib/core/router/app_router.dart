@@ -9,6 +9,8 @@ import '../../features/admin/presentation/admin_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
 import '../../features/product/presentation/product_detail_page.dart';
 import '../../features/warehouse/presentation/warehouse_page.dart';
+import '../../features/cart/presentation/cart_drawer.dart';
+import '../../core/state/cart_scope.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -23,28 +25,51 @@ class AppRoutes {
   static String product(String id) => '/producto/$id';
 }
 
+// Shell que envuelve todas las páginas con el CartDrawer
+class _AppShell extends StatelessWidget {
+  final Widget child;
+  const _AppShell({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        child,
+        const CartDrawer(),
+      ],
+    );
+  }
+}
+
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.home,
   routes: [
-    GoRoute(path: AppRoutes.home,
-        builder: (_, __) => const HomePage()),
+    // Shell con CartDrawer en todas las páginas
+    ShellRoute(
+      builder: (context, state, child) => _AppShell(child: child),
+      routes: [
+        GoRoute(path: AppRoutes.home,
+            builder: (_, __) => const HomePage()),
+        GoRoute(path: AppRoutes.catalog,
+            builder: (_, __) => const CatalogPage()),
+        GoRoute(path: AppRoutes.checkout,
+            builder: (_, __) => const CheckoutPage()),
+        GoRoute(path: AppRoutes.profile,
+            builder: (_, __) => const ProfilePage()),
+        GoRoute(path: '/producto/:id',
+            builder: (_, state) => ProductDetailPage(
+                productId: state.pathParameters['id'] ?? '')),
+      ],
+    ),
+    // Páginas sin CartDrawer
     GoRoute(path: AppRoutes.login,
         builder: (_, __) => const LoginPage()),
     GoRoute(path: AppRoutes.register,
         builder: (_, __) => const RegisterPage()),
-    GoRoute(path: AppRoutes.catalog,
-        builder: (_, __) => const CatalogPage()),
-    GoRoute(path: AppRoutes.checkout,
-        builder: (_, __) => const CheckoutPage()),
     GoRoute(path: AppRoutes.admin,
         builder: (_, __) => const AdminPage()),
-    GoRoute(path: AppRoutes.profile,
-        builder: (_, __) => const ProfilePage()),
     GoRoute(path: AppRoutes.warehouse,
         builder: (_, __) => const WarehousePage()),
-    GoRoute(path: '/producto/:id',
-        builder: (_, state) => ProductDetailPage(
-            productId: state.pathParameters['id'] ?? '')),
   ],
   errorBuilder: (context, state) => Scaffold(
     body: Center(child: Column(
