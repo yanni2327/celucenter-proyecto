@@ -39,7 +39,10 @@ class _CartDrawerState extends State<CartDrawer> {
     final screenWidth = MediaQuery.of(context).size.width;
     final drawerWidth = screenWidth < 500 ? screenWidth : 420.0;
 
-    return Stack(
+    return IgnorePointer(
+      // Cuando el carrito está cerrado, no interceptar ningún toque
+      ignoring: !_cart.isOpen,
+      child: Stack(
       children: [
         // Fondo oscuro
         if (_cart.isOpen)
@@ -87,6 +90,7 @@ class _CartDrawerState extends State<CartDrawer> {
           ),
         ),
       ],
+      ),
     );
   }
 }
