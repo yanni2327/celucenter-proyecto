@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/app_router.dart';
+import '../../../core/patterns/decorators/product_decorator.dart';
+import '../../../core/state/cart_controller.dart';
+import '../../../core/patterns/decorators/product_decorator.dart';
+import '../../../core/state/cart_controller.dart';
 import '../../../core/security/secure_http_client.dart';
 import '../../../core/state/cart_scope.dart';
 import '../../../core/theme/app_colors.dart';
@@ -193,7 +197,11 @@ class _CatalogPageState extends State<CatalogPage> {
                       padding: const EdgeInsets.fromLTRB(40, 32, 40, 52),
                       sliver: SliverGrid(
                         delegate: SliverChildBuilderDelegate(
-                          (_, i) => _CatalogProductCard(product: _products[i]),
+                          (_, i) => ProductDecoratorFactory.decorate(
+                            _products[i],
+                            onTap: () => context.go(AppRoutes.product(_products[i].id)),
+                            onAddToCart: () => CartController().addItem(_products[i]),
+                          ).buildCard(context),
                           childCount: _products.length,
                         ),
                         gridDelegate:
@@ -258,7 +266,9 @@ class _CatalogProductCardState extends State<_CatalogProductCard> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit:  (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
+      child: GestureDetector(
+        onTap: () => context.go(AppRoutes.product(widget.product.id)),
+        child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
           color: AppColors.white,

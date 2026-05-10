@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/patterns/decorators/product_decorator.dart';
+import '../../../../core/router/app_router.dart';
+import '../../../../core/state/cart_controller.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/security/secure_http_client.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -100,7 +106,11 @@ class _FeaturedProductsSectionState extends State<FeaturedProductsSection> {
               childAspectRatio: 0.78,
             ),
             itemCount: _products.length,
-            itemBuilder: (_, i) => ProductCard(product: _products[i]),
+            itemBuilder: (_, i) => ProductDecoratorFactory.decorate(
+              _products[i],
+              onTap: () => context.go(AppRoutes.product(_products[i].id)),
+              onAddToCart: () => CartController().addItem(_products[i]),
+            ).buildCard(context),
           ),
       ]),
     );
