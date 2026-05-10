@@ -411,9 +411,27 @@ class _DecoratedProductCardState extends State<_DecoratedProductCard> {
                             widget.product.imageUrl!,
                             width: double.infinity,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Center(
-                              child: Text(widget.product.emoji,
-                                  style: const TextStyle(fontSize: 44))),
+                            headers: const {
+                              'Access-Control-Allow-Origin': '*',
+                            },
+                            loadingBuilder: (_, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                  strokeWidth: 2,
+                                  color: AppColors.primary,
+                                ),
+                              );
+                            },
+                            errorBuilder: (_, error, __) {
+                              return Center(
+                                child: Text(widget.product.emoji,
+                                    style: const TextStyle(fontSize: 44)));
+                            },
                           ))
                       : Center(child: Text(widget.product.emoji,
                             style: const TextStyle(fontSize: 44))),
